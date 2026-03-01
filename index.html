@@ -102,7 +102,7 @@
             margin-bottom: 10px;
         }
 
-        /* 截图区域（核心内容，不含引导语） */
+        /* 截图区域（核心内容） */
         #capture-area {
             background: #fff9fb;
             border-radius: 40px;
@@ -302,7 +302,7 @@
             cursor: pointer;
         }
 
-        /* ================= 图片预览层（优化关闭体验） ================= */
+        /* ================= 图片预览层 ================= */
         .preview-overlay {
             display: none;
             position: fixed;
@@ -325,7 +325,6 @@
             text-align: center;
             position: relative;
         }
-        /* 右上角关闭图标 */
         .preview-close-icon {
             position: absolute;
             top: 5px;
@@ -368,7 +367,6 @@
         .preview-tip .tip-icon {
             font-size: 1.5em;
         }
-        /* 底部关闭按钮（增大尺寸） */
         .close-preview {
             background: #a55c71;
             border: none;
@@ -391,19 +389,20 @@
     </style>
 </head>
 <body>
-    <!-- ================= 图片预览层（优化关闭体验） ================= -->
+    <!-- ================= 音频元素 ================= -->
+    <!-- 已替换为您指定的新音乐链接，自动循环播放，无控制按钮 -->
+    <audio id="bgMusic" loop src="https://cdn.pixabay.com/download/audio/2026/02/09/audio_91b249a551.mp3?filename=the_mountain-love-481753.mp3"></audio>
+
+    <!-- ================= 图片预览层 ================= -->
     <div class="preview-overlay" id="previewOverlay">
         <div class="preview-content" id="previewContent">
-            <!-- 新增右上角关闭图标 -->
             <div class="preview-close-icon" id="previewCloseIcon">✖</div>
             <img id="previewImage" src="" alt="预览">
             <div class="preview-tip">
                 <span class="tip-icon">👇</span>
                 <span class="tip-text">长按图片，选择“保存到相册”</span>
             </div>
-            <!-- 移除了原先的“保存图片”按钮，避免 alert 干扰 -->
         </div>
-        <!-- 底部关闭按钮（已增强） -->
         <button class="close-preview" id="closePreview">关 闭</button>
     </div>
 
@@ -424,7 +423,7 @@
     <div class="page" id="page2">
         <h2>🎁 专属抽奖器 🎁</h2>
         
-        <!-- 截图区域（核心内容，不含引导语） -->
+        <!-- 截图区域（核心内容） -->
         <div id="capture-area">
             <div class="history-card">
                 <h3>抽到的惊喜</h3>
@@ -439,7 +438,6 @@
                 <span id="signatureName">爱你的宝贝</span> · <span id="currentDate"></span>
             </div>
 
-            <!-- 品牌信息（可自定义） -->
             <div class="brand" id="brandText">来自 XX编程 · 用代码说爱你</div>
         </div>
 
@@ -459,11 +457,11 @@
 
     <script>
         // ================= 孩子可以修改的区域 =================
-        const CHILD_NAME = "宝贝";           // 孩子的名字（将显示在图片上）
-        const CUSTOM_MESSAGE = "亲爱的妈妈，你是世界上最美的女神！"; // 第一页个性化祝福
+        const CHILD_NAME = "宝贝";           // 孩子的名字
+        const CUSTOM_MESSAGE = "亲爱的妈妈，你是世界上最美的女神！";
         const MAX_DRAWS = 3;                  // 总共可抽奖次数
-        const WISHES_TEXT = "妈妈，女神节快乐！愿你每天都开心 💕"; // 图片上的祝福语
-        const BRAND_NAME = "XX编程";           // 机构名称（可修改）
+        const WISHES_TEXT = "妈妈，女神节快乐！愿你每天都开心 💕";
+        const BRAND_NAME = "XX编程";           // 机构名称
         const MESSAGES = [                     // 抽奖内容库
             "🌸 给妈妈一个拥抱！",
             "💐 承包今晚洗碗！",
@@ -507,9 +505,12 @@
         const previewOverlay = document.getElementById('previewOverlay');
         const previewImage = document.getElementById('previewImage');
         const closePreview = document.getElementById('closePreview');
-        const previewCloseIcon = document.getElementById('previewCloseIcon'); // 新增关闭图标
+        const previewCloseIcon = document.getElementById('previewCloseIcon');
 
-        // 设置当前日期（格式：2026年3月8日）
+        // 音乐元素
+        const bgMusic = document.getElementById('bgMusic');
+
+        // 设置当前日期
         const today = new Date();
         const year = today.getFullYear();
         const month = today.getMonth() + 1;
@@ -564,32 +565,25 @@
                 return;
             }
 
-            // 按钮抖动动画
             drawBtn.classList.add('shake');
             setTimeout(() => drawBtn.classList.remove('shake'), 300);
 
-            // 随机抽取
             const randomIndex = Math.floor(Math.random() * MESSAGES.length);
             const prize = MESSAGES[randomIndex];
 
-            // 更新计数
             drawCount++;
             updateDrawCountDisplay();
 
-            // 更新历史（最新插入到开头，保留最多3条）
             history.unshift(prize);
             if (history.length > 3) history.pop();
 
-            // 渲染历史，并高亮最新项
             renderHistory(true);
 
-            // 振动（可选）
             if (navigator.vibrate) {
                 navigator.vibrate(50);
             }
         }
 
-        // 绑定抽奖按钮
         drawBtn.addEventListener('click', drawLottery);
 
         // 页面切换
@@ -601,9 +595,10 @@
         backBtn.addEventListener('click', function() {
             page2.style.display = 'none';
             page1.style.display = 'block';
+            // 注意：不再暂停音乐，让音乐持续播放
         });
 
-        // 保存图片：生成截图并显示预览层
+        // 保存图片
         saveBtn.addEventListener('click', function() {
             html2canvas(captureArea, {
                 scale: 2,
@@ -611,33 +606,46 @@
                 allowTaint: false,
                 useCORS: true
             }).then(canvas => {
-                // 将 canvas 转换为图片 URL
                 const imgData = canvas.toDataURL('image/png');
                 previewImage.src = imgData;
-                previewOverlay.style.display = 'flex'; // 显示预览层
+                previewOverlay.style.display = 'flex';
             }).catch(error => {
                 console.error('截图失败', error);
                 alert('截图失败，请稍后重试');
             });
         });
 
-        // 关闭预览层的多种方式
+        // 关闭预览层
         function closePreviewOverlay() {
             previewOverlay.style.display = 'none';
         }
-
-        // 底部关闭按钮
         closePreview.addEventListener('click', closePreviewOverlay);
-
-        // 右上角关闭图标
         previewCloseIcon.addEventListener('click', closePreviewOverlay);
-
-        // 点击背景关闭（点击预览层自身）
         previewOverlay.addEventListener('click', function(e) {
             if (e.target === previewOverlay) {
                 closePreviewOverlay();
             }
         });
+
+        // ========== 音乐自动播放（从第一页开始） ==========
+        let musicStarted = false;
+        function attemptPlayMusic() {
+            if (musicStarted) return;
+            bgMusic.play().then(() => {
+                musicStarted = true;
+            }).catch(e => {
+                console.log('自动播放失败，等待用户手势', e);
+            });
+        }
+
+        // 页面加载时尝试播放
+        attemptPlayMusic();
+
+        // 监听第一页的首次点击，如果音乐未开始则尝试播放
+        document.addEventListener('click', function onFirstClick() {
+            attemptPlayMusic();
+            document.removeEventListener('click', onFirstClick);
+        }, { once: true });
 
         // 初始化
         updateDrawCountDisplay();
