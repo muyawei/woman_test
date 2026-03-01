@@ -302,7 +302,7 @@
             cursor: pointer;
         }
 
-        /* ================= 图片预览层 ================= */
+        /* ================= 图片预览层（优化关闭体验） ================= */
         .preview-overlay {
             display: none;
             position: fixed;
@@ -325,6 +325,30 @@
             text-align: center;
             position: relative;
         }
+        /* 右上角关闭图标 */
+        .preview-close-icon {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .preview-close-icon:hover,
+        .preview-close-icon:active {
+            background: rgba(0,0,0,0.6);
+        }
         .preview-content img {
             width: 100%;
             border-radius: 15px;
@@ -344,42 +368,43 @@
         .preview-tip .tip-icon {
             font-size: 1.5em;
         }
-        .preview-save-btn {
-            background: #ffb6c1;
-            border: none;
-            border-radius: 40px;
-            padding: 12px 20px;
-            font-size: 1.2em;
-            color: white;
-            margin: 5px 0;
-            cursor: pointer;
-            border: 2px solid #d44b6b;
-            width: 80%;
-        }
+        /* 底部关闭按钮（增大尺寸） */
         .close-preview {
             background: #a55c71;
             border: none;
-            border-radius: 30px;
-            padding: 10px 30px;
+            border-radius: 40px;
+            padding: 14px 40px;
             color: white;
-            font-size: 1em;
-            margin-top: 15px;
+            font-size: 1.3em;
+            margin-top: 20px;
             cursor: pointer;
+            border: 2px solid #d44b6b;
+            min-width: 160px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #6d3b4a;
+            transition: 0.1s ease;
+        }
+        .close-preview:active {
+            transform: translateY(4px);
+            box-shadow: none;
         }
     </style>
 </head>
 <body>
-    <!-- ================= 图片预览层（增强提示） ================= -->
+    <!-- ================= 图片预览层（优化关闭体验） ================= -->
     <div class="preview-overlay" id="previewOverlay">
         <div class="preview-content" id="previewContent">
+            <!-- 新增右上角关闭图标 -->
+            <div class="preview-close-icon" id="previewCloseIcon">✖</div>
             <img id="previewImage" src="" alt="预览">
             <div class="preview-tip">
                 <span class="tip-icon">👇</span>
                 <span class="tip-text">长按图片，选择“保存到相册”</span>
             </div>
-            <button class="preview-save-btn" id="previewSaveBtn">📥 保存图片</button>
+            <!-- 移除了原先的“保存图片”按钮，避免 alert 干扰 -->
         </div>
-        <button class="close-preview" id="closePreview">关闭</button>
+        <!-- 底部关闭按钮（已增强） -->
+        <button class="close-preview" id="closePreview">关 闭</button>
     </div>
 
     <!-- ================= 第一页：祝福页 ================= -->
@@ -482,7 +507,7 @@
         const previewOverlay = document.getElementById('previewOverlay');
         const previewImage = document.getElementById('previewImage');
         const closePreview = document.getElementById('closePreview');
-        const previewSaveBtn = document.getElementById('previewSaveBtn');
+        const previewCloseIcon = document.getElementById('previewCloseIcon'); // 新增关闭图标
 
         // 设置当前日期（格式：2026年3月8日）
         const today = new Date();
@@ -596,21 +621,22 @@
             });
         });
 
-        // 关闭预览层
-        closePreview.addEventListener('click', function() {
+        // 关闭预览层的多种方式
+        function closePreviewOverlay() {
             previewOverlay.style.display = 'none';
-        });
+        }
 
-        // 点击预览层背景也可关闭
+        // 底部关闭按钮
+        closePreview.addEventListener('click', closePreviewOverlay);
+
+        // 右上角关闭图标
+        previewCloseIcon.addEventListener('click', closePreviewOverlay);
+
+        // 点击背景关闭（点击预览层自身）
         previewOverlay.addEventListener('click', function(e) {
             if (e.target === previewOverlay) {
-                previewOverlay.style.display = 'none';
+                closePreviewOverlay();
             }
-        });
-
-        // 预览层中的“保存图片”按钮：提示长按操作
-        previewSaveBtn.addEventListener('click', function() {
-            alert('请长按上方图片，选择“保存到相册”');
         });
 
         // 初始化
