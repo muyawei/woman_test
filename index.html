@@ -7,6 +7,7 @@
     <!-- html2canvas 用于截图 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        /* ================= 全局样式 ================= */
         * {
             margin: 0;
             padding: 0;
@@ -31,7 +32,8 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             transition: opacity 0.5s ease;
         }
-        /* 第一页：祝福页 */
+
+        /* ================= 第一页：祝福页 ================= */
         #page1 {
             text-align: center;
         }
@@ -88,7 +90,8 @@
             transform: translateY(6px);
             box-shadow: none;
         }
-        /* 第二页：抽奖页 */
+
+        /* ================= 第二页：抽奖页 ================= */
         #page2 {
             display: none;
             text-align: center;
@@ -98,7 +101,8 @@
             color: #d44b6b;
             margin-bottom: 10px;
         }
-        /* 截图区域：抽奖结果卡片（不含引导语） */
+
+        /* 截图区域（核心内容，不含引导语） */
         #capture-area {
             background: #fff9fb;
             border-radius: 40px;
@@ -109,7 +113,6 @@
             position: relative;
             overflow: hidden;
         }
-        /* 添加背景装饰（小爱心） */
         #capture-area::before {
             content: "❤️";
             position: absolute;
@@ -128,6 +131,7 @@
             opacity: 0.1;
             transform: rotate(-10deg);
         }
+
         .history-card {
             background: #ffeef0;
             border-radius: 30px;
@@ -147,7 +151,8 @@
             padding: 8px 0;
             border-radius: 40px;
         }
-        .history-card h3::before, .history-card h3::after {
+        .history-card h3::before,
+        .history-card h3::after {
             content: "🎁";
             margin: 0 10px;
             font-size: 1.2em;
@@ -178,6 +183,7 @@
             border-color: #d44b6b;
             box-shadow: 0 0 10px #ffb6c1;
         }
+
         .wishes {
             font-size: 1.5em;
             color: #d44b6b;
@@ -186,6 +192,7 @@
             position: relative;
             z-index: 2;
         }
+
         .signature-card {
             color: #a55c71;
             font-size: 1.2em;
@@ -195,7 +202,7 @@
             position: relative;
             z-index: 2;
         }
-        /* 机构品牌（保留在截图内） */
+
         .brand {
             color: #b13e5c;
             font-size: 0.9em;
@@ -204,7 +211,8 @@
             position: relative;
             z-index: 2;
         }
-        /* 分享引导语（在截图区域外，不会出现在图片中） */
+
+        /* 界面引导语（不在截图内） */
         .share-tip {
             color: #a55c71;
             font-size: 0.9em;
@@ -212,6 +220,8 @@
             font-style: italic;
             text-align: center;
         }
+
+        /* 抽奖按钮 */
         .lottery-btn {
             background: #ff9aae;
             border: none;
@@ -259,11 +269,13 @@
             box-shadow: 0 4px 0 #b13e5c;
             transform: translateY(4px);
         }
+
         .draw-info {
             color: #a55c71;
             font-size: 1.2em;
             margin: 10px 0;
         }
+
         .save-btn {
             background: #a55c71;
             border: none;
@@ -278,6 +290,7 @@
         .save-btn:active {
             opacity: 0.8;
         }
+
         .back-btn {
             background: transparent;
             border: 2px solid #ffb6c1;
@@ -288,10 +301,88 @@
             margin-top: 20px;
             cursor: pointer;
         }
+
+        /* ================= 图片预览层 ================= */
+        .preview-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .preview-content {
+            max-width: 90%;
+            max-height: 70%;
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+        .preview-content img {
+            width: 100%;
+            border-radius: 15px;
+            display: block;
+        }
+        .preview-tip {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 40px;
+            margin: 15px 0 10px;
+            font-size: 1.2em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .preview-tip .tip-icon {
+            font-size: 1.5em;
+        }
+        .preview-save-btn {
+            background: #ffb6c1;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 20px;
+            font-size: 1.2em;
+            color: white;
+            margin: 5px 0;
+            cursor: pointer;
+            border: 2px solid #d44b6b;
+            width: 80%;
+        }
+        .close-preview {
+            background: #a55c71;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 30px;
+            color: white;
+            font-size: 1em;
+            margin-top: 15px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <!-- ========== 第一页：祝福页 ========== -->
+    <!-- ================= 图片预览层（增强提示） ================= -->
+    <div class="preview-overlay" id="previewOverlay">
+        <div class="preview-content" id="previewContent">
+            <img id="previewImage" src="" alt="预览">
+            <div class="preview-tip">
+                <span class="tip-icon">👇</span>
+                <span class="tip-text">长按图片，选择“保存到相册”</span>
+            </div>
+            <button class="preview-save-btn" id="previewSaveBtn">📥 保存图片</button>
+        </div>
+        <button class="close-preview" id="closePreview">关闭</button>
+    </div>
+
+    <!-- ================= 第一页：祝福页 ================= -->
     <div class="page" id="page1">
         <h1>🌸 女神节快乐 🌸</h1>
         <div class="heart">❤️</div>
@@ -304,11 +395,11 @@
         <button class="btn" id="gotoBtn">👉 开启惊喜 👈</button>
     </div>
 
-    <!-- ========== 第二页：抽奖页 ========== -->
+    <!-- ================= 第二页：抽奖页 ================= -->
     <div class="page" id="page2">
         <h2>🎁 专属抽奖器 🎁</h2>
         
-        <!-- 截图区域：只包含核心内容（不含分享引导语） -->
+        <!-- 截图区域（核心内容，不含引导语） -->
         <div id="capture-area">
             <div class="history-card">
                 <h3>抽到的惊喜</h3>
@@ -323,18 +414,21 @@
                 <span id="signatureName">爱你的宝贝</span> · <span id="currentDate"></span>
             </div>
 
-            <!-- 品牌信息保留在截图内 -->
+            <!-- 品牌信息（可自定义） -->
             <div class="brand" id="brandText">来自 XX编程 · 用代码说爱你</div>
         </div>
 
-        <!-- 分享引导语放在截图区域外，只显示在界面上 -->
+        <!-- 界面引导语（不在截图内） -->
         <div class="share-tip">📱 保存图片，分享这份惊喜到朋友圈吧~</div>
 
+        <!-- 抽奖按钮及状态 -->
         <button class="lottery-btn" id="drawBtn">✨ 点击抽奖 ✨</button>
         <div class="draw-info" id="drawCountDisplay">还可抽奖 3 次</div>
         
+        <!-- 保存图片按钮 -->
         <button class="save-btn" id="saveBtn">📸 保存精美图片</button>
         
+        <!-- 返回祝福页 -->
         <button class="back-btn" id="backBtn">« 返回祝福页</button>
     </div>
 
@@ -383,6 +477,12 @@
         const currentDateSpan = document.getElementById('currentDate');
         const saveBtn = document.getElementById('saveBtn');
         const captureArea = document.getElementById('capture-area');
+
+        // 预览层元素
+        const previewOverlay = document.getElementById('previewOverlay');
+        const previewImage = document.getElementById('previewImage');
+        const closePreview = document.getElementById('closePreview');
+        const previewSaveBtn = document.getElementById('previewSaveBtn');
 
         // 设置当前日期（格式：2026年3月8日）
         const today = new Date();
@@ -439,27 +539,35 @@
                 return;
             }
 
+            // 按钮抖动动画
             drawBtn.classList.add('shake');
             setTimeout(() => drawBtn.classList.remove('shake'), 300);
 
+            // 随机抽取
             const randomIndex = Math.floor(Math.random() * MESSAGES.length);
             const prize = MESSAGES[randomIndex];
 
+            // 更新计数
             drawCount++;
             updateDrawCountDisplay();
 
+            // 更新历史（最新插入到开头，保留最多3条）
             history.unshift(prize);
             if (history.length > 3) history.pop();
 
+            // 渲染历史，并高亮最新项
             renderHistory(true);
 
+            // 振动（可选）
             if (navigator.vibrate) {
                 navigator.vibrate(50);
             }
         }
 
+        // 绑定抽奖按钮
         drawBtn.addEventListener('click', drawLottery);
 
+        // 页面切换
         gotoBtn.addEventListener('click', function() {
             page1.style.display = 'none';
             page2.style.display = 'block';
@@ -470,6 +578,7 @@
             page1.style.display = 'block';
         });
 
+        // 保存图片：生成截图并显示预览层
         saveBtn.addEventListener('click', function() {
             html2canvas(captureArea, {
                 scale: 2,
@@ -477,16 +586,34 @@
                 allowTaint: false,
                 useCORS: true
             }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `女神节抽奖结果_${CHILD_NAME}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+                // 将 canvas 转换为图片 URL
+                const imgData = canvas.toDataURL('image/png');
+                previewImage.src = imgData;
+                previewOverlay.style.display = 'flex'; // 显示预览层
             }).catch(error => {
                 console.error('截图失败', error);
                 alert('截图失败，请稍后重试');
             });
         });
 
+        // 关闭预览层
+        closePreview.addEventListener('click', function() {
+            previewOverlay.style.display = 'none';
+        });
+
+        // 点击预览层背景也可关闭
+        previewOverlay.addEventListener('click', function(e) {
+            if (e.target === previewOverlay) {
+                previewOverlay.style.display = 'none';
+            }
+        });
+
+        // 预览层中的“保存图片”按钮：提示长按操作
+        previewSaveBtn.addEventListener('click', function() {
+            alert('请长按上方图片，选择“保存到相册”');
+        });
+
+        // 初始化
         updateDrawCountDisplay();
         renderHistory(false);
     </script>
