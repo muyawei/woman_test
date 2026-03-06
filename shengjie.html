@@ -1,1 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>女神节·爱的抽奖</title>
+    <!-- html2canvas 用于截图 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* ================= 全局样式 ================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #fce4e4 0%, #ffd9df 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        .page {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 30px 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: opacity 0.5s ease;
+        }
 
+        /* ================= 第一页：祝福页 ================= */
+        #page1 {
+            text-align: center;
+        }
+        #page1 h1 {
+            font-size: 2.8em;
+            color: #d44b6b;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #ffe6ea;
+        }
+        .greeting {
+            background: #fff0f2;
+            border-radius: 30px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #ffb6c1;
+        }
+        .greeting p {
+            font-size: 1.5em;
+            color: #b13e5c;
+            line-height: 1.6;
+        }
+        .greeting .sign {
+            margin-top: 15px;
+            font-size: 1.2em;
+            color: #a55c71;
+            font-style: italic;
+        }
+        .heart {
+            font-size: 3em;
+            margin: 10px 0;
+            animation: beat 1s infinite;
+        }
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        .btn {
+            background: #ffb6c1;
+            border: none;
+            border-radius: 60px;
+            padding: 18px 35px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 6px 0 #ff8da1;
+            transition: 0.1s ease;
+            margin: 20px 0 10px;
+            width: 80%;
+            max-width: 280px;
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+
+        /* ================= 第二页：抽奖页 ================= */
+        #page2 {
+            display: none;
+            text-align: center;
+        }
+        #page2 h2 {
+            font-size: 2em;
+            color: #d44b6b;
+            margin-bottom: 10px;
+        }
+
+        /* 截图区域（核心内容） */
+        #capture-area {
+            background: #fff9fb;
+            border-radius: 40px;
+            padding: 25px 20px;
+            margin: 20px 0;
+            border: 3px solid #ffb6c1;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        #capture-area::before {
+            content: "❤️";
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 40px;
+            opacity: 0.1;
+            transform: rotate(15deg);
+        }
+        #capture-area::after {
+            content: "🌸";
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            font-size: 40px;
+            opacity: 0.1;
+            transform: rotate(-10deg);
+        }
+
+        .history-card {
+            background: #ffeef0;
+            border-radius: 30px;
+            padding: 20px 15px;
+            margin: 0 0 15px;
+            position: relative;
+            z-index: 2;
+        }
+        .history-card h3 {
+            color: #a55c71;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.5);
+            padding: 8px 0;
+            border-radius: 40px;
+        }
+        .history-card h3::before,
+        .history-card h3::after {
+            content: "🎁";
+            margin: 0 10px;
+            font-size: 1.2em;
+        }
+        .history-items {
+            list-style: none;
+        }
+        .history-items li {
+            font-size: 1.3em;
+            color: #b13e5c;
+            padding: 12px 16px;
+            background: #fff9fa;
+            border-radius: 50px;
+            margin: 8px 0;
+            border: 2px solid #ffb6c1;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: background 0.3s;
+        }
+        .history-items li::before {
+            content: "🎁";
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+        .history-items li.highlight {
+            background: #ffe0e6;
+            border-color: #d44b6b;
+            box-shadow: 0 0 10px #ffb6c1;
+        }
+
+        .wishes {
+            font-size: 1.5em;
+            color: #d44b6b;
+            margin: 20px 0 10px;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+
+        .signature-card {
+            color: #a55c71;
+            font-size: 1.2em;
+            margin-top: 15px;
+            border-top: 2px dashed #ffb6c1;
+            padding-top: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand {
+            color: #b13e5c;
+            font-size: 0.9em;
+            margin-top: 10px;
+            opacity: 0.7;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 界面引导语（不在截图内） */
+        .share-tip {
+            color: #a55c71;
+            font-size: 0.9em;
+            margin: 5px 0 15px;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* 抽奖按钮 */
+        .lottery-btn {
+            background: #ff9aae;
+            border: none;
+            border-radius: 60px;
+            padding: 20px 30px;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 0 #b13e5c;
+            transition: 0.1s ease;
+            margin: 15px 0;
+            width: 90%;
+            max-width: 350px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .lottery-btn:active {
+            transform: translateY(8px);
+            box-shadow: none;
+        }
+        .lottery-btn.shake {
+            animation: shake 0.3s ease;
+        }
+        .lottery-btn.shake::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);
+            opacity: 0.4;
+        }
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(-5deg); }
+            75% { transform: rotate(3deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .lottery-btn.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            box-shadow: 0 4px 0 #b13e5c;
+            transform: translateY(4px);
+        }
+
+        .draw-info {
+            color: #a55c71;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .save-btn {
+            background: #a55c71;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 20px;
+            font-size: 1.2em;
+            color: white;
+            margin: 10px 0;
+            cursor: pointer;
+            border: 2px solid #d44b6b;
+        }
+        .save-btn:active {
+            opacity: 0.8;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 2px solid #ffb6c1;
+            border-radius: 40px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #d44b6b;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        /* ================= 图片预览层 ================= */
+        .preview-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .preview-content {
+            max-width: 90%;
+            max-height: 70%;
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+        .preview-close-icon {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .preview-close-icon:hover,
+        .preview-close-icon:active {
+            background: rgba(0,0,0,0.6);
+        }
+        .preview-content img {
+            width: 100%;
+            border-radius: 15px;
+            display: block;
+        }
+        .preview-tip {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 40px;
+            margin: 15px 0 10px;
+            font-size: 1.2em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .preview-tip .tip-icon {
+            font-size: 1.5em;
+        }
+        .close-preview {
+            background: #a55c71;
+            border: none;
+            border-radius: 40px;
+            padding: 14px 40px;
+            color: white;
+            font-size: 1.3em;
+            margin-top: 20px;
+            cursor: pointer;
+            border: 2px solid #d44b6b;
+            min-width: 160px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #6d3b4a;
+            transition: 0.1s ease;
+        }
+        .close-preview:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- ================= 音频元素 ================= -->
+    <!-- 已替换为您指定的新音乐链接，自动循环播放，无控制按钮 -->
+    <audio id="bgMusic" loop src="https://cdn.pixabay.com/download/audio/2026/02/09/audio_91b249a551.mp3?filename=the_mountain-love-481753.mp3"></audio>
+
+    <!-- ================= 图片预览层 ================= -->
+    <div class="preview-overlay" id="previewOverlay">
+        <div class="preview-content" id="previewContent">
+            <div class="preview-close-icon" id="previewCloseIcon">✖</div>
+            <img id="previewImage" src="" alt="预览">
+            <div class="preview-tip">
+                <span class="tip-icon">👇</span>
+                <span class="tip-text">长按图片，选择“保存到相册”</span>
+            </div>
+        </div>
+        <button class="close-preview" id="closePreview">关 闭</button>
+    </div>
+
+    <!-- ================= 第一页：祝福页 ================= -->
+    <div class="page" id="page1">
+        <h1>🌸 女神节快乐 🌸</h1>
+        <div class="heart">❤️</div>
+        <div class="greeting">
+            <p id="personalMessage">亲爱的妈妈，你是世界上最美的女神！</p>
+            <p>感谢你一直以来的陪伴和爱护。</p>
+            <p>今天，我用代码为你准备了一份专属惊喜~</p>
+            <div class="sign" id="childName">—— 爱你的宝贝</div>
+        </div>
+        <button class="btn" id="gotoBtn">👉 开启惊喜 👈</button>
+    </div>
+
+    <!-- ================= 第二页：抽奖页 ================= -->
+    <div class="page" id="page2">
+        <h2>🎁 专属抽奖器 🎁</h2>
+        
+        <!-- 截图区域（核心内容） -->
+        <div id="capture-area">
+            <div class="history-card">
+                <h3>抽到的惊喜</h3>
+                <ul class="history-items" id="historyItems">
+                    <li style="opacity:0.6;">✨ 还没有抽奖记录 ✨</li>
+                </ul>
+            </div>
+            
+            <div class="wishes" id="wishesText">妈妈，女神节快乐！愿你每天都开心 💕</div>
+            
+            <div class="signature-card">
+                <span id="signatureName">爱你的宝贝</span> · <span id="currentDate"></span>
+            </div>
+
+            <div class="brand" id="brandText">来自 XX编程 · 用代码说爱你</div>
+        </div>
+
+        <!-- 界面引导语（不在截图内） -->
+        <div class="share-tip">📱 保存图片，分享这份惊喜到朋友圈吧~</div>
+
+        <!-- 抽奖按钮及状态 -->
+        <button class="lottery-btn" id="drawBtn">✨ 点击抽奖 ✨</button>
+        <div class="draw-info" id="drawCountDisplay">还可抽奖 3 次</div>
+        
+        <!-- 保存图片按钮 -->
+        <button class="save-btn" id="saveBtn">📸 保存精美图片</button>
+        
+        <!-- 返回祝福页 -->
+        <button class="back-btn" id="backBtn">« 返回祝福页</button>
+    </div>
+
+    <script>
+        // ================= 孩子可以修改的区域 =================
+        const CHILD_NAME = "圣杰";           // 孩子的名字
+        const CUSTOM_MESSAGE = "亲爱的妈妈，你是世界上最美的女神！";
+        const MAX_DRAWS = 3;                  // 总共可抽奖次数
+        const WISHES_TEXT = "妈妈，女神节快乐！愿你每天都开心 💕";
+        const BRAND_NAME = "XX编程";           // 机构名称
+        const MESSAGES = [                     // 抽奖内容库
+            "🌸 给妈妈一个拥抱！",
+            "💐 承包今晚洗碗！",
+            "🍰 为妈妈做一张贺卡",
+            "🎁 送妈妈一朵康乃馨",
+            "✨ 今天不惹妈妈生气",
+            "💖 帮妈妈按摩十分钟",
+            "📖 给妈妈讲个笑话",
+            "🥟 和妈妈一起包饺子",
+            "🎵 为妈妈唱首歌",
+            "🌟 永远爱妈妈！",
+            "☕️ 为妈妈泡杯茶",
+            "🛍️ 陪妈妈逛街",
+            "📸 和妈妈合影",
+            "💌 写一封感谢信"
+        ];
+        // ====================================================
+
+        // ---------- 全局变量 ----------
+        let drawCount = 0;
+        let history = [];          // 最多保存3条
+
+        // ---------- 元素绑定 ----------
+        const page1 = document.getElementById('page1');
+        const page2 = document.getElementById('page2');
+        const gotoBtn = document.getElementById('gotoBtn');
+        const backBtn = document.getElementById('backBtn');
+        const drawBtn = document.getElementById('drawBtn');
+        const historyItems = document.getElementById('historyItems');
+        const drawCountDisplay = document.getElementById('drawCountDisplay');
+        const childNameSpan = document.getElementById('childName');
+        const personalMessageP = document.getElementById('personalMessage');
+        const signatureName = document.getElementById('signatureName');
+        const wishesText = document.getElementById('wishesText');
+        const brandText = document.getElementById('brandText');
+        const currentDateSpan = document.getElementById('currentDate');
+        const saveBtn = document.getElementById('saveBtn');
+        const captureArea = document.getElementById('capture-area');
+
+        // 预览层元素
+        const previewOverlay = document.getElementById('previewOverlay');
+        const previewImage = document.getElementById('previewImage');
+        const closePreview = document.getElementById('closePreview');
+        const previewCloseIcon = document.getElementById('previewCloseIcon');
+
+        // 音乐元素
+        const bgMusic = document.getElementById('bgMusic');
+
+        // 设置当前日期
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth() + 1;
+        const day = today.getDate();
+        currentDateSpan.innerText = `${year}年${month}月${day}日`;
+
+        // 初始化祝福页文字
+        childNameSpan.innerText = '—— 爱你的 ' + CHILD_NAME;
+        personalMessageP.innerText = CUSTOM_MESSAGE;
+        signatureName.innerText = '爱你的 ' + CHILD_NAME;
+        wishesText.innerText = WISHES_TEXT;
+        brandText.innerText = `来自 ${BRAND_NAME} · 用代码说爱你`;
+
+        // 更新剩余次数显示
+        function updateDrawCountDisplay() {
+            const remaining = MAX_DRAWS - drawCount;
+            drawCountDisplay.innerText = `还可抽奖 ${remaining} 次`;
+            if (remaining <= 0) {
+                drawBtn.classList.add('disabled');
+                drawBtn.innerText = '✨ 抽奖结束 ✨';
+            } else {
+                drawBtn.classList.remove('disabled');
+                drawBtn.innerText = '✨ 点击抽奖 ✨';
+            }
+        }
+
+        // 渲染最近3次抽奖记录
+        function renderHistory(highlightNew = false) {
+            if (history.length === 0) {
+                historyItems.innerHTML = '<li style="opacity:0.6;">✨ 还没有抽奖记录 ✨</li>';
+                return;
+            }
+            let html = '';
+            history.forEach((item, index) => {
+                const highlightClass = (highlightNew && index === 0) ? 'highlight' : '';
+                html += `<li class="${highlightClass}">${item}</li>`;
+            });
+            historyItems.innerHTML = html;
+
+            if (highlightNew) {
+                setTimeout(() => {
+                    const items = document.querySelectorAll('.history-items li');
+                    items.forEach(li => li.classList.remove('highlight'));
+                }, 800);
+            }
+        }
+
+        // 抽奖函数
+        function drawLottery() {
+            if (drawCount >= MAX_DRAWS) {
+                alert('抽奖次数已用完，下次女神节再来吧~');
+                return;
+            }
+
+            drawBtn.classList.add('shake');
+            setTimeout(() => drawBtn.classList.remove('shake'), 300);
+
+            const randomIndex = Math.floor(Math.random() * MESSAGES.length);
+            const prize = MESSAGES[randomIndex];
+
+            drawCount++;
+            updateDrawCountDisplay();
+
+            history.unshift(prize);
+            if (history.length > 3) history.pop();
+
+            renderHistory(true);
+
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        drawBtn.addEventListener('click', drawLottery);
+
+        // 页面切换
+        gotoBtn.addEventListener('click', function() {
+            page1.style.display = 'none';
+            page2.style.display = 'block';
+        });
+
+        backBtn.addEventListener('click', function() {
+            page2.style.display = 'none';
+            page1.style.display = 'block';
+            // 注意：不再暂停音乐，让音乐持续播放
+        });
+
+        // 保存图片
+        saveBtn.addEventListener('click', function() {
+            html2canvas(captureArea, {
+                scale: 2,
+                backgroundColor: '#fff9fb',
+                allowTaint: false,
+                useCORS: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                previewImage.src = imgData;
+                previewOverlay.style.display = 'flex';
+            }).catch(error => {
+                console.error('截图失败', error);
+                alert('截图失败，请稍后重试');
+            });
+        });
+
+        // 关闭预览层
+        function closePreviewOverlay() {
+            previewOverlay.style.display = 'none';
+        }
+        closePreview.addEventListener('click', closePreviewOverlay);
+        previewCloseIcon.addEventListener('click', closePreviewOverlay);
+        previewOverlay.addEventListener('click', function(e) {
+            if (e.target === previewOverlay) {
+                closePreviewOverlay();
+            }
+        });
+
+        // ========== 音乐自动播放（从第一页开始） ==========
+        let musicStarted = false;
+        function attemptPlayMusic() {
+            if (musicStarted) return;
+            bgMusic.play().then(() => {
+                musicStarted = true;
+            }).catch(e => {
+                console.log('自动播放失败，等待用户手势', e);
+            });
+        }
+
+        // 页面加载时尝试播放
+        attemptPlayMusic();
+
+        // 监听第一页的首次点击，如果音乐未开始则尝试播放
+        document.addEventListener('click', function onFirstClick() {
+            attemptPlayMusic();
+            document.removeEventListener('click', onFirstClick);
+        }, { once: true });
+
+        // 初始化
+        updateDrawCountDisplay();
+        renderHistory(false);
+    </script>
+</body>
+</html>
